@@ -1,23 +1,20 @@
-import classes.CourierDes;
+import api.OrderAPI;
 import classes.Track;
 import io.qameta.allure.Description;
-import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import lombok.AllArgsConstructor;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.restassured.RestAssured.given;
-import static org.apache.commons.lang3.ArrayUtils.add;
 import static org.hamcrest.CoreMatchers.notNullValue;
-
+@AllArgsConstructor
 @RunWith(Parameterized.class)
 public class CreateOrderTest {
-
     private String firstName;
     private String lastName;
     private String address;
@@ -28,18 +25,6 @@ public class CreateOrderTest {
     private String comment;
     private String[] color;
 
-    public CreateOrderTest(String firstName, String lastName, String address, String metroStation,
-                           String phone, Number rentTime, String deliveryDate, String comment, String[] color) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
-        this.metroStation = metroStation;
-        this.phone = phone;
-        this.rentTime = rentTime;
-        this.deliveryDate = deliveryDate;
-        this.comment = comment;
-        this.color = color;
-    }
     @Parameterized.Parameters
     public static Object[][] getOrderDataTest() {
        String[] arrayAllColor = {"BLACK", "GREY"};
@@ -63,19 +48,10 @@ public class CreateOrderTest {
     @DisplayName("Check create order")
     @Description("Basic create test for /api/v1/orders endpoint")
     public void createOrder() {
-        Response response = sendPostRequestCreateOrder();
+        OrderAPI orderAPI = new OrderAPI();
+        Response response = orderAPI.sendPostRequestCreateOrder(getOrderDataTest());
         response.then().statusCode(201);
         Track track = response.body().as(Track.class);
         MatcherAssert.assertThat(track.getTrack(), notNullValue());
-    }
-
-    @Step ("Send POST request create order to /api/v1/orders")
-    public Response sendPostRequestCreateOrder() {
-        return given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(getOrderDataTest())
-                .when()
-                .post("/api/v1/orders");
     }
 }
