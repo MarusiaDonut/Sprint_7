@@ -1,10 +1,10 @@
 import api.OrderAPI;
+import classes.Order;
 import classes.Track;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import lombok.AllArgsConstructor;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
-@AllArgsConstructor
 @RunWith(Parameterized.class)
 public class CreateOrderTest {
     private String firstName;
@@ -25,6 +24,19 @@ public class CreateOrderTest {
     private String comment;
     private String[] color;
 
+    public CreateOrderTest(String firstName, String lastName, String address,
+                 String metroStation, String phone, Number rentTime,
+                 String deliveryDate, String comment, String[] color) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.metroStation = metroStation;
+        this.phone = phone;
+        this.rentTime = rentTime;
+        this.deliveryDate = deliveryDate;
+        this.comment = comment;
+        this.color = color;
+    }
     @Parameterized.Parameters
     public static Object[][] getOrderDataTest() {
        String[] arrayAllColor = {"BLACK", "GREY"};
@@ -48,8 +60,9 @@ public class CreateOrderTest {
     @DisplayName("Check create order")
     @Description("Basic create test for /api/v1/orders endpoint")
     public void createOrder() {
+        Order order = new Order(firstName, lastName, address, metroStation, phone, rentTime, deliveryDate, comment, color);
         OrderAPI orderAPI = new OrderAPI();
-        Response response = orderAPI.sendPostRequestCreateOrder(getOrderDataTest());
+        Response response = orderAPI.sendPostRequestCreateOrder(order);
         response.then().statusCode(201);
         Track track = response.body().as(Track.class);
         MatcherAssert.assertThat(track.getTrack(), notNullValue());
